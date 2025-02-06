@@ -1,0 +1,14 @@
+[project]
+name = "bass-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "accelerate>=1.3.0",
+    "discord-py>=2.4.0",
+    "huggingface-hub>=0.28.1",
+    "python-dotenv>=1.0.1",
+    "sentence-transformers>=3.4.1",
+    "transformers>=4.48.2",
+]
