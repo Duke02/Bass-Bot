@@ -1,9 +1,11 @@
 # This example requires the 'message_content' intent.
 
+from datetime import datetime
 import os
 from pathlib import Path
 import typing as tp
 
+from asyncio import Lock
 import discord
 from discord.ext import commands
 import numpy as np
@@ -42,13 +44,21 @@ run_sentiment = get_sentiment_runner()
 
 
 def get_music_runner() -> tp.Callable[[str], discord.File]:
-    model: str = 'facebook/musicgen-small'
+    model: str = 'facebook/musicgen-large'
     synthesiser = pipeline("text-to-audio", model=model, device=get_device())
+
+    def prompt_to_filename(prompt: str) -> str:
+        curr_time: str = datetime.now().strftime("%Y%m%d-%H%M%S")
+        return curr_time + '_'.join(prompt.lower().split(' ')[:5]) + '.wav'
+
     def inner(prompt: str) -> discord.File:
+        filename: str = prompt_to_filename(prompt)
         sample = synthesiser(prompt, forward_params={'do_sample': True})
-        scipy.io.wavfile.write('temp.wav', rate=sample['sampling_rate'], data=sample['audio'].detach()[0, 0].cpu().numpy())
-        with Path('temp.wav').open('rb') as audio_file:
-            return discord.File(audio_file.read())
+        actual_audio: np.ndarray = sample['audio'][0, 0]
+        sampling_rate = sample['sampling_rate']
+        scipy.io.wavfile.write(filename, rate=sampling_rate, data=actual_audio)
+        return discord.File(filename)
+    print('Set up music runner')
     return inner
 
 
@@ -86,29 +96,38 @@ BOT_PREFIX: str = '!'
 bot: commands.Bot = commands.Bot(command_prefix=BOT_PREFIX, intents=intents)
 
 @bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
+async def ping(ctx: commands.Context):
+    await ctx.send('pong', reference=ctx.message)
 
 
 @bot.command()
-async def repeat(ctx, *, text: str):
-    await ctx.send(text)
+async def repeat(ctx: commands.Context, *, text: str):
+    await ctx.send(text, reference=ctx.message)
 
+music_gen_lock: Lock = Lock()
 
 @bot.command('bass')
-async def make_bass(ctx, *, prompt: str):
-    wav_file: discord.File = music_runner(prompt)
-    await ctx.send(wav_file)
+async def make_bass(ctx: commands.Context, *, prompt: str):
+    await ctx.send('Please give me a bit...', reference=ctx.message)
+    try:
+        if music_gen_lock.locked():
+            await ctx.send('[BUSY PROCESSING OTHER REQUESTS] You\'ll need to wait your turn for a bit...', reference=ctx.message)
+        async with music_gen_lock:
+            wav_file: discord.File = music_runner(prompt)
+        await ctx.send('Here you go boss!', file=wav_file, reference=ctx.message)
+    except ValueError as e:
+        await ctx.send(f'Sorry king the mixtape was too fire. Error: {e}', reference=ctx.message)
+    except Exception as e:
+        await ctx.send(f'Sorry boss but something went wrong. Error: {e}', reference=ctx.message)
 
 
 @bot.event
 async def on_message(message: discord.Message):
     if message.content.startswith(BOT_PREFIX):
         return await bot.process_commands(message)
-    print(f'Message from {message.author}: {message.content}')
     if message.author != bot.user and bot.user in message.mentions:
         response: str = get_response(message.content, bot.user.mention)
-        await message.channel.send(response)
+        await message.channel.send(response, reference=message)
 
 bot.run(os.environ['DISCORD_TOKEN'])
 # @bot.command(name='help')

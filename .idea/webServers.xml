@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e7e5930b-7990-45bb-a783-263376a73e01" name="duke-server">
+        <fileTransfer rootFolder="/home/duke_trystan/Documents/BassBot/Bass-Bot" accessType="SFTP" host="10.0.0.45" port="22" sshConfigId="2ccfb611-e7e6-4c4e-8579-dc8646550579" sshConfig="duke_trystan@10.0.0.45:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
