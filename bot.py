@@ -145,6 +145,8 @@ async def make_bass(ctx: commands.Context, *, prompt: str):
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     print('MEEP MOP')
     message_id: int = payload.message_id
+    if payload.user_id == bot.user.id:
+        return
     if not database.contains_message(message_id):
         return
     if payload.emoji.name not in {ONE_REACTION, TWO_REACTION}:
