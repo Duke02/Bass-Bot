@@ -10,9 +10,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.5.29 /uv /uvx /bin/
 COPY pyproject.toml .
 COPY .python-version .
 COPY uv.lock .
+ENV HF_HOME=/app/data/hf
 RUN uv sync --frozen
 
 COPY .env .
+COPY db.py .
 COPY bot.py .
 
 CMD ["uv", "run", "python", "bot.py"]
