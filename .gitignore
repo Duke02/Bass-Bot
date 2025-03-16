@@ -252,3 +252,4 @@ fabric.properties
 run_docker.sh
 *.wav
 data
+.idea
