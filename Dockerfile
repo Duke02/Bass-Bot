@@ -15,6 +15,7 @@ RUN uv sync --frozen
 
 COPY .env .
 COPY db.py .
+COPY bot_funcs.py .
 COPY bot.py .
 
 CMD ["uv", "run", "python", "bot.py"]

@@ -1,0 +1,1 @@
+docker container run --rm -v "bass-songs:/source" -v "$(pwd):/backup" -w /source debian tar czf /backup/bass-songs.tar.gz .
