@@ -250,3 +250,5 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 run_docker.sh
+*.wav
+data
