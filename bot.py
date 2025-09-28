@@ -44,11 +44,18 @@ bot: commands.Bot = commands.Bot(command_prefix=BOT_PREFIX, intents=intents)
 
 @bot.command()
 async def ping(ctx: commands.Context):
+    """
+    Pings Bass Bot to see whether it's up or just super slow.
+    """
     await ctx.send('pong', reference=ctx.message)
 
 
 @bot.command()
 async def repeat(ctx: commands.Context, *, text: str):
+    """
+    Repeats the given text a single time. Good for debugging the status of Bass Bot.
+    :param text: The text you want to repeat.
+    """
     await ctx.send(text, reference=ctx.message)
 
 
@@ -68,6 +75,10 @@ prompt_queue: Queue = Queue()
 
 @bot.command('bass')
 async def add_to_queue(ctx: commands.Context, *, prompt: str):
+    """
+    Adds your prompt to the queue of songs to generate.
+    :param prompt: The prompt you want Bass Bot to create a song from.
+    """
     await ctx.send('Adding you to queue...', reference=ctx.message)
     async with queue_lock:
         await prompt_queue.put((ctx, prompt))
@@ -95,6 +106,10 @@ async def make_bass(ctx: commands.Context, *, prompt: str):
 
 @bot.command('queue')
 async def queue_len(ctx: commands.Context):
+    """
+    Tells you how many songs there are that Bass Bot needs to process.
+    :param ctx:
+    """
     # Gets the current queue length
     is_running: bool = music_gen_lock.locked()
     num_in_line: int = prompt_queue.qsize()
@@ -105,6 +120,10 @@ async def queue_len(ctx: commands.Context):
 
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    """
+    Saves reactions to Bass Bot messages when users react to them.
+    :param payload:
+    """
     message_id: int = payload.message_id
     if payload.user_id == bot.user.id:
         return
@@ -138,6 +157,10 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 @bot.event
 async def on_message(message: discord.Message):
+    """
+    Responds to @Bass-Bot or commands that it has enabled.
+    :param message:
+    """
     if message.content.startswith(BOT_PREFIX):
         return await bot.process_commands(message)
     if message.author != bot.user and bot.user in message.mentions:
@@ -147,6 +170,9 @@ async def on_message(message: discord.Message):
 
 @tasks.loop(seconds=0.5, name='queue_processor')
 async def process_queue():
+    """
+    Processes the queue of songs that were requested.
+    """
     if not prompt_queue.empty():
         print(f'Processing queue: {prompt_queue.qsize()}')
         async with queue_lock:
@@ -157,6 +183,9 @@ async def process_queue():
 
 @bot.event
 async def on_ready():
+    """
+    Starts up the queue processor loop.
+    """
     process_queue.start()
 
 
