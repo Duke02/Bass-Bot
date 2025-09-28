@@ -17,7 +17,7 @@ def does_table_exist(db: sqlite3.Connection, table_name: str) -> bool:
 
 class FeedbackDatabase:
     def __init__(self, db_path: Path | None = None):
-        self.db_path: Path = db_path.resolve() or Path('.').resolve() / 'data' / 'feedback.db'
+        self.db_path: Path = (db_path or Path('.')).resolve() / 'data' / 'feedback.db'
 
         if not self.db_path.exists():
             raise FileNotFoundError(f'{self.db_path} does not exist even though volumes should be being used.')
