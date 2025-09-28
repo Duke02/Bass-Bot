@@ -1,0 +1,24 @@
+services:
+  bot:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      - HF_HOME=/app/data/hf
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities:
+                - gpu
+    restart: on-failure:3
+    volumes:
+      - bass-songs:/app/data
+
+volumes:
+  bass-songs:
+    external: true
